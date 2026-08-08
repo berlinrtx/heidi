@@ -40,10 +40,18 @@ export default async function handler(req, res) {
       senderEmail,
       recipientName,
       recipientEmail,
+      recipientPhone,
+      deliveryMethod,
+      billingName,
+      billingEmail,
+      billingPhone,
       personalMessage,
       giftCardAmount,
       giftCardDiscount,
       giftCardFinalAmount,
+      termsAccepted,
+      termsAcceptedAt,
+      termsVersion,
       isGiftCard
     } = req.body;
 
@@ -60,9 +68,16 @@ export default async function handler(req, res) {
       if (!senderEmail) missingGiftCardFields.push('senderEmail');
       if (!recipientName) missingGiftCardFields.push('recipientName');
       if (!recipientEmail) missingGiftCardFields.push('recipientEmail');
+      if (!recipientPhone) missingGiftCardFields.push('recipientPhone');
       if (giftCardAmount === undefined || giftCardAmount === null || giftCardAmount === '') missingGiftCardFields.push('giftCardAmount');
       if (giftCardDiscount === undefined || giftCardDiscount === null || giftCardDiscount === '') missingGiftCardFields.push('giftCardDiscount');
       if (giftCardFinalAmount === undefined || giftCardFinalAmount === null || giftCardFinalAmount === '') missingGiftCardFields.push('giftCardFinalAmount');
+
+      if (!isTruthy(termsAccepted) || !termsAcceptedAt || !termsVersion) {
+        return res.status(400).json({
+          error: 'You must accept the Terms & Conditions and Privacy Policy before completing this purchase.'
+        });
+      }
 
       if (missingGiftCardFields.length > 0) {
         return res.status(400).json({
@@ -85,11 +100,19 @@ export default async function handler(req, res) {
         senderName: toMetadataValue(senderName),
         senderEmail: toMetadataValue(senderEmail),
         recipientName: toMetadataValue(recipientName),
-        recipientEmail: toMetadataValue(recipientEmail),
+        recipientEmail: toMetadataValue(recipientEmail || ''),
+        recipientPhone: toMetadataValue(recipientPhone || ''),
+        deliveryMethod: toMetadataValue(deliveryMethod || 'both'),
+        billingName: toMetadataValue(billingName || ''),
+        billingEmail: toMetadataValue(billingEmail || ''),
+        billingPhone: toMetadataValue(billingPhone || ''),
         personalMessage: toMetadataValue(personalMessage || ''),
         giftCardAmount: toMetadataValue(giftCardAmount),
         giftCardDiscount: toMetadataValue(giftCardDiscount),
-        giftCardFinalAmount: toMetadataValue(giftCardFinalAmount)
+        giftCardFinalAmount: toMetadataValue(giftCardFinalAmount),
+        termsAccepted: 'true',
+        termsAcceptedAt: toMetadataValue(termsAcceptedAt),
+        termsVersion: toMetadataValue(termsVersion)
       });
     }
 
